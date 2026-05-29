@@ -1,15 +1,28 @@
 export default async function handler(req, res) {
+    // Mengatur Header CORS secara komprehensif
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
 
-    const { type, query, messages } = req.body;
+    // Pendekatan parsing body yang aman baik dari form maupun json raw
+    let bodyData = {};
+    if (req.method === 'POST') {
+        try {
+            bodyData = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+        } catch (e) {
+            return res.status(400).json({ status: false, message: "Invalid JSON Body" });
+        }
+    }
 
-    // ROUTER 1: PENCARIAN GAMBAR (Tetap lewat Termai)
+    const type = bodyData.type || req.query.type;
+    const query = bodyData.query || req.query.query;
+    const messages = bodyData.messages;
+
+    // ROUTER 1: SYSTEM PENCARIAN GAMBAR WAIFU
     if (type === 'search' || req.method === 'GET') {
         const searchQuery = query || req.query.query;
         if (!searchQuery) return res.status(400).json({ status: false, message: "Query required" });
@@ -20,21 +33,19 @@ export default async function handler(req, res) {
             const data = await response.json();
             return res.status(200).json(data);
         } catch (error) {
-            return res.status(500).json({ status: false, message: "Database Error" });
+            return res.status(500).json({ status: false, message: "Image Node Database Error" });
         }
     }
 
-    // ROUTER 2: AI CHAT ASSISTANT (Langsung menggunakan API Resmi Groq)
+    // ROUTER 2: AI CHAT ASSISTANT (GROQ SYSTEM)
     if (type === 'chat' && req.method === 'POST') {
         if (!messages || !Array.isArray(messages)) {
             return res.status(400).json({ status: false, message: "Messages array required" });
         }
 
-        // Ambil API Key Groq dari Environment Variable Vercel
         const groqApiKey = process.env.GROQ_API_KEY;
-
         if (!groqApiKey) {
-            return res.status(500).json({ status: false, message: "Groq API Key is not configured on Vercel" });
+            return res.status(500).json({ status: false, message: "GROQ_API_KEY is missing on Vercel Environment Variables" });
         }
 
         const systemPrompt = {
@@ -42,8 +53,13 @@ export default async function handler(req, res) {
             content: "Kamu adalah Mizu AI, seorang asisten ahli yang sangat populer di bidang anime, manga, pop-culture Jepang, dan waifu. Gaya bicaramu santai, ramah, dan sedikit menggunakan estetika komputer masa depan. Kamu HANYA boleh menjawab pertanyaan seputar anime, manga, karakter fiksi (waifu/husbando), dan kultur jejepangan. Jika pengguna bertanya di luar topik tersebut, tolaklah dengan sopan dan alihkan kembali ke pembahasan waifu."
         };
 
+        // Bersihkan array pesan agar hanya menyisakan 'role' dan 'content' yang sah untuk standar OpenAI/Groq
+        const cleanedMessages = messages.map(msg => ({
+            role: msg.role === 'assistant' ? 'assistant' : (msg.role === 'system' ? 'system' : 'user'),
+            content: String(msg.content)
+        }));
+
         try {
-            // Menembak langsung ke Endpoint Resmi Groq Cloud API
             const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -51,22 +67,25 @@ export default async function handler(req, res) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    messages: [systemPrompt, ...messages],
-                    model: "llama3-70b-8192", // Kamu bisa ganti ke llama3-8b-8192 atau mixtral-8x7b-32768 jika mau
+                    messages: [systemPrompt, ...cleanedMessages],
+                    model: "llama3-70b-8192", 
                     temperature: 0.7
                 })
             });
 
             const data = await response.json();
             
-            // Mengambil teks balasan dari struktur data response OpenAI/Groq standard
-            const aiReply = data.choices[0].message.content;
-            
-            return res.status(200).json({ status: true, data: aiReply });
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+                const aiReply = data.choices[0].message.content;
+                return res.status(200).json({ status: true, data: aiReply });
+            } else {
+                // Mengembalikan pesan error detail dari server Groq (jika kuota habis / salah key)
+                return res.status(500).json({ status: false, data: "Groq API Error Response", raw: data });
+            }
         } catch (error) {
-            return res.status(500).json({ status: false, message: "Groq AI Node Connection Lost" });
+            return res.status(500).json({ status: false, message: "Failed to connect to Groq Cloud Network" });
         }
     }
 
     return res.status(400).json({ status: false, message: "Invalid Request Type" });
-            }
+                               }
