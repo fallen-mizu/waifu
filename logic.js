@@ -111,7 +111,7 @@ if (downloadBtn) {
 
         showCustomModal({
             title: "Download Stream",
-            text: "Ingin mengunduh aset visual waifu terpilih langsung ke penyimpanan perangkat lokal kamu?",
+            text: "Ingin mengunduh aset visual waifu terpilih langsung ke penyimpanan perangkat lokal kamu? Silakan klik Konfirmasi dan kamu akan diarahkan ke Original Image dan tahan image lalu klik download Image.",
             icon: "fa-solid fa-cloud-arrow-down text-emerald-500",
             showCancel: true,
             onConfirm: () => {
