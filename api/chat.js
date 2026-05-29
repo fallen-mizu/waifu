@@ -1,4 +1,7 @@
-export default async function handler(req, res) {
+// Menggunakan modul bawaan Node.js untuk menangani fetch data secara aman
+const fetch = require('node-fetch').default || global.fetch;
+
+module.exports = async function handler(req, res) {
     // Mengatur Header CORS secara komprehensif
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -14,7 +17,7 @@ export default async function handler(req, res) {
         try {
             bodyData = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
         } catch (e) {
-            return res.status(400).json({ status: false, message: "Invalid JSON Body" });
+            bodyData = req.body || {};
         }
     }
 
@@ -22,7 +25,7 @@ export default async function handler(req, res) {
     const query = bodyData.query || req.query.query;
     const messages = bodyData.messages;
 
-    // ROUTER 1: SYSTEM PENCARIAN GAMBAR WAIFU
+    // ROUTER 1: SYSTEM PENCARIAN GAMBAR WAIFU (PINTEREST VIA TERMAI)
     if (type === 'search' || req.method === 'GET') {
         const searchQuery = query || req.query.query;
         if (!searchQuery) return res.status(400).json({ status: false, message: "Query required" });
@@ -37,7 +40,7 @@ export default async function handler(req, res) {
         }
     }
 
-    // ROUTER 2: AI CHAT ASSISTANT (GROQ SYSTEM)
+    // ROUTER 2: AI CHAT ASSISTANT (GROQ SYSTEM RESMI)
     if (type === 'chat' && req.method === 'POST') {
         if (!messages || !Array.isArray(messages)) {
             return res.status(400).json({ status: false, message: "Messages array required" });
@@ -50,10 +53,10 @@ export default async function handler(req, res) {
 
         const systemPrompt = {
             role: "system",
-            content: "Kamu adalah Mizu AI, seorang asisten ahli yang sangat populer di bidang anime, manga, pop-culture Jepang, dan waifu. Gaya bicaramu santai, ramah, dan sedikit menggunakan estetika komputer masa depan. Kamu HANYA boleh menjawab pertanyaan seputar anime, manga, karakter fiksi (waifu/husbando), dan kultur jejepangan. Jika pengguna bertanya di luar topik tersebut, tolaklah dengan sopan dan alihkan kembali ke pembahasan waifu."
+            content: "Kamu adalah Mizu AI, sebuah asisten kecerdasan buatan terenkripsi yang berjalan di jaringan Mizu Core System. Kamu adalah pakar mutlak di bidang anime, manga, kultur pop Jepang, dan waifu populer (termasuk Arisu Sakayanagi, Hutao, dll). Gaya bicaramu santai, sangat ramah, cerdas, dan sedikit menggunakan estetika sistem komputer masa depan. Kamu HANYA diperbolehkan menjawab pertanyaan seputar anime, manga, dan waifu. Jika ada topik di luar itu, tolak secara halus dan arahkan kembali pengguna untuk membahas waifu."
         };
 
-        // Bersihkan array pesan agar hanya menyisakan 'role' dan 'content' yang sah untuk standar OpenAI/Groq
+        // Bersihkan array pesan agar sesuai dengan format standar OpenAI/Groq API
         const cleanedMessages = messages.map(msg => ({
             role: msg.role === 'assistant' ? 'assistant' : (msg.role === 'system' ? 'system' : 'user'),
             content: String(msg.content)
@@ -79,8 +82,7 @@ export default async function handler(req, res) {
                 const aiReply = data.choices[0].message.content;
                 return res.status(200).json({ status: true, data: aiReply });
             } else {
-                // Mengembalikan pesan error detail dari server Groq (jika kuota habis / salah key)
-                return res.status(500).json({ status: false, data: "Groq API Error Response", raw: data });
+                return res.status(500).json({ status: false, message: "Groq API returned an empty response architecture", error: data });
             }
         } catch (error) {
             return res.status(500).json({ status: false, message: "Failed to connect to Groq Cloud Network" });
@@ -88,4 +90,5 @@ export default async function handler(req, res) {
     }
 
     return res.status(400).json({ status: false, message: "Invalid Request Type" });
-                               }
+};
+        
