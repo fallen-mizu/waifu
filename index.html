@@ -224,30 +224,24 @@
         searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') { const val = searchInput.value.trim(); if(val) loadWaifu(val); } });
         randomBtn.addEventListener('click', () => { const rc = randomWaifus[Math.floor(Math.random() * randomWaifus.length)]; searchInput.value = rc; loadWaifu(rc); });
         
-        // Fitur Force Download Menggunakan Blob Object Bypassing Browser View
-        downloadBtn.addEventListener('click', async () => {
-            if(!resultImage.src) return;
-            const originalText = downloadBtn.innerHTML;
-            try {
-                downloadBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Downloading...`;
-                const imgResponse = await fetch(resultImage.src);
-                const imageBlob = await imgResponse.blob();
-                const blobUrl = window.URL.createObjectURL(imageBlob);
-                
-                const downloadLink = document.createElement('a');
-                downloadLink.href = blobUrl;
-                downloadLink.download = `waifu_${Date.now()}.jpg`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-                window.URL.revokeObjectURL(blobUrl);
-            } catch (err) {
-                // Fallback jika CORS Gambar ketat, langsung buka tab baru
-                window.open(resultImage.src, '_blank');
-            } finally {
-                downloadBtn.innerHTML = originalText;
-            }
+                // Fitur Download Langsung Menggunakan Trik Elemen Jangkar (Lebih Aman dari Blokir CORS)
+        downloadBtn.addEventListener('click', () => {
+            if (!resultImage.src) return;
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = resultImage.src;
+            // Memberi nama file otomatis saat diunduh
+            downloadLink.download = `waifu_${Date.now()}.jpg`;
+            
+            // Pengaman tambahan untuk browser mobile
+            downloadLink.target = '_blank'; 
+            downloadLink.rel = 'noopener noreferrer';
+            
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
         });
+        
 
 
         // ================= AI CHAT (STREAM TYPING EFFECT) LOGIC =================
