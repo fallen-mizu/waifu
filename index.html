@@ -8,32 +8,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #080b11;
-        }
-        .glass-card {
-            background: rgba(13, 18, 30, 0.75);
-            backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-        }
-        .brand-crimson {
-            color: #BC002D;
-        }
-        .bg-crimson {
-            background-color: #BC002D;
-        }
-        .bg-crimson:hover {
-            background-color: #990024;
-        }
-        .border-crimson:focus {
-            border-color: #BC002D;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #080b11; }
+        .glass-card { background: rgba(13, 18, 30, 0.75); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.03); }
+        .brand-crimson { color: #BC002D; }
+        .bg-crimson { background-color: #BC002D; }
+        .bg-crimson:hover { background-color: #990024; }
+        .border-crimson:focus { border-color: #BC002D; }
+        
+        /* Custom Scrollbar Chat */
+        .chat-area::-webkit-scrollbar { width: 4px; }
+        .chat-area::-webkit-scrollbar-thumb { background: #222b3c; border-radius: 10px; }
     </style>
 </head>
-<body class="text-gray-200 min-h-screen flex flex-col justify-between overflow-x-hidden">
+<body class="text-gray-200 min-h-screen flex flex-col justify-between overflow-x-hidden relative">
 
-    <header class="w-full border-b border-gray-900 bg-gray-950/40 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+    <header class="w-full border-b border-gray-900 bg-gray-950/40 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-rose-700 flex items-center justify-center shadow-lg shadow-red-900/30">
@@ -51,13 +40,11 @@
     </header>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
         <section class="lg:col-span-4 space-y-6">
             <div class="glass-card p-6 rounded-2xl shadow-xl">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-sliders brand-crimson"></i> Control Console
                 </h2>
-                
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Manual Database Search</label>
@@ -69,13 +56,11 @@
                             </button>
                         </div>
                     </div>
-
                     <div class="relative flex py-1 items-center">
                         <div class="flex-grow border-t border-gray-900"></div>
                         <span class="flex-shrink mx-3 text-gray-600 text-[10px] uppercase font-mono">OR</span>
                         <div class="flex-grow border-t border-gray-900"></div>
                     </div>
-
                     <button id="random-btn" class="w-full bg-crimson text-white text-sm font-medium py-3 px-4 rounded-xl transition-all shadow-lg shadow-red-900/20 active:scale-[0.99] flex items-center justify-center gap-2">
                         <i class="fa-solid fa-dice-five"></i> New Random Waifu
                     </button>
@@ -100,58 +85,111 @@
 
         <section class="lg:col-span-8 flex flex-col">
             <div class="glass-card rounded-2xl p-4 flex-grow flex flex-col min-h-[520px]">
-                
                 <div class="flex justify-between items-center border-b border-gray-900 pb-4 mb-4">
-                    <h3 id="gallery-title" class="text-xs font-mono tracking-wider text-gray-500 uppercase">
-                        Console Idle
-                    </h3>
+                    <h3 id="gallery-title" class="text-xs font-mono tracking-wider text-gray-500 uppercase">Console Idle</h3>
                     <button id="download-btn" disabled class="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 disabled:opacity-30 disabled:hover:bg-gray-900 text-gray-300 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5">
                         <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Original
                     </button>
                 </div>
 
                 <div class="flex-grow flex items-center justify-center relative overflow-hidden rounded-xl bg-gray-950/40 border border-gray-900/60 min-h-[420px]">
-                    
                     <div id="placeholder-view" class="text-center space-y-2.5 p-6">
                         <div class="w-12 h-12 mx-auto rounded-xl bg-gray-950 border border-gray-900 flex items-center justify-center text-gray-600">
                             <i class="fa-regular fa-images text-lg"></i>
                         </div>
-                        <p class="text-xs text-gray-500 max-w-xs mx-auto font-sans">Ketik karakter secara spesifik atau picu generator acak untuk menampilkan visual.</p>
+                        <p class="text-xs text-gray-500 max-w-xs mx-auto">Ketik karakter secara spesifik atau picu generator acak untuk menampilkan visual.</p>
                     </div>
-
                     <div id="loading-view" class="hidden text-center space-y-3">
                         <div class="w-9 h-9 border-2 border-red-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
                         <p class="text-[11px] font-mono tracking-widest text-gray-500 uppercase">Bypassing and Pulling assets...</p>
                     </div>
-
                     <img id="result-image" src="" alt="Waifu Stream" class="hidden max-h-[72vh] w-full object-contain transition-all duration-300 rounded-lg shadow-2xl">
                 </div>
             </div>
         </section>
     </main>
 
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <div id="chat-window" class="hidden w-[360px] h-[480px] max-w-[calc(100vw-2rem)] rounded-2xl glass-card flex flex-col shadow-2xl overflow-hidden mb-4 border border-gray-800 transition-all duration-300">
+            <div class="p-4 border-b border-gray-900 bg-gray-950/80 flex justify-between items-center">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-2.5 h-2.5 rounded-full bg-crimson animate-pulse"></div>
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider">Mizu AI Assistant</h4>
+                        <p class="text-[10px] text-gray-500 font-mono">Powered by Groq AI</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="new-chat-btn" title="New Chat" class="p-1.5 rounded-lg bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white transition-colors text-xs">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                    <button id="close-chat-btn" class="p-1.5 rounded-lg hover:bg-gray-900 text-gray-500 hover:text-gray-300 transition-colors text-xs">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="chat-area" class="chat-area flex-grow p-4 overflow-y-auto space-y-4 text-xs">
+                <div class="flex flex-col items-start max-w-[85%]">
+                    <div class="bg-gray-900 text-gray-300 rounded-2xl rounded-tl-none p-3 border border-gray-800/40">
+                        Halo! Aku Mizu AI. Tanyakan apa saja tentang waifu populer, anime, atau manga kesukaanmu! 🌸
+                    </div>
+                    <span class="text-[9px] text-gray-600 font-mono mt-1 system-time">00:00</span>
+                </div>
+            </div>
+
+            <div class="p-3 border-t border-gray-900 bg-gray-950/50">
+                <div class="flex gap-2">
+                    <input type="text" id="chat-input" placeholder="Tanya seputar waifu..." class="flex-grow bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs focus:outline-none border-crimson transition-all text-gray-200">
+                    <button id="send-chat-btn" class="bg-crimson hover:bg-red-700 text-white px-3 rounded-xl transition-all flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <button id="toggle-chat-btn" class="w-12 h-12 rounded-full bg-crimson text-white flex items-center justify-center shadow-lg shadow-red-950/50 hover:scale-105 active:scale-95 transition-all">
+            <i id="toggle-icon" class="fa-solid fa-comments text-lg"></i>
+        </button>
+    </div>
+
     <footer class="w-full text-center py-5 border-t border-gray-950 text-[11px] font-mono text-gray-600 bg-gray-950/60">
-        <p>&copy; 2026 Waifu Vault Project. Powered by Groq AI & Termai API Net.</p>
+        <p>&copy; 2026 Waifu Vault Project. Powered by Private API Net.</p>
     </footer>
 
     <script>
-        const randomWaifus = [
-            "Arisu Sakayanagi", "Kamisato Ayaka", "Hu Tao", "Raiden Shogun", 
-            "Makima", "Kafka Honkai", "Yae Miko", "Kafuu Chino", 
-            "Ganyu Genshin", "Rem Re Zero", "Asuka Langley", "Zero Two", 
-            "Kurumi Tokisaki", "Chizuru Mizuhara", "Yor Forger", "Elisabeth"
-        ];
+        const randomWaifus = ["Arisu Sakayanagi", "Kamisato Ayaka", "Hu Tao", "Raiden Shogun", "Makima", "Kafka Honkai", "Yae Miko", "Kafuu Chino", "Ganyu Genshin", "Rem Re Zero", "Asuka Langley", "Zero Two", "Kurumi Tokisaki", "Chizuru Mizuhara", "Yor Forger"];
 
+        // Image Search Selectors
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
         const randomBtn = document.getElementById('random-btn');
         const downloadBtn = document.getElementById('download-btn');
-        
         const placeholderView = document.getElementById('placeholder-view');
         const loadingView = document.getElementById('loading-view');
         const resultImage = document.getElementById('result-image');
         const galleryTitle = document.getElementById('gallery-title');
 
+        // AI Chat Selectors
+        const chatWindow = document.getElementById('chat-window');
+        const toggleChatBtn = document.getElementById('toggle-chat-btn');
+        const toggleIcon = document.getElementById('toggle-icon');
+        const closeChatBtn = document.getElementById('close-chat-btn');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const chatArea = document.getElementById('chat-area');
+        const chatInput = document.getElementById('chat-input');
+        const sendChatBtn = document.getElementById('send-chat-btn');
+
+        // Memory Array (Dikelola via LocalStorage)
+        let chatMemory = JSON.parse(localStorage.getItem('mizu_ai_memory')) || [];
+
+        // Inisialisasi Jam Awal Pengguna
+        document.querySelector('.system-time').innerText = getUserTime();
+
+        function getUserTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ================= IMAGE CORE LOGIC =================
         async function loadWaifu(query) {
             placeholderView.classList.add('hidden');
             resultImage.classList.add('hidden');
@@ -160,57 +198,150 @@
             galleryTitle.innerText = `FETCHING: ${query.toUpperCase()}`;
 
             try {
-                // Menembak ke Serverless Function milik kita sendiri di Vercel (/api/chat)
-                const response = await fetch(`/api/chat?query=${encodeURIComponent(query + " anime icons highres")}`);
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'search', query: query + " anime icons highres" })
+                });
                 const resData = await response.json();
 
                 if (resData.status && resData.data && resData.data.length > 0) {
-                    // Ambil satu gambar secara acak dari data array yang didapat
-                    const images = resData.data;
-                    const randomImgUrl = images[Math.floor(Math.random() * images.length)];
-
+                    const randomImgUrl = resData.data[Math.floor(Math.random() * resData.data.length)];
                     resultImage.src = randomImgUrl;
                     resultImage.onload = () => {
                         loadingView.classList.add('hidden');
-                        resultImage.classList.remove('hidden');
+                        resultImage.removeCls = resultImage.classList.remove('hidden');
                         downloadBtn.disabled = false;
                         galleryTitle.innerText = `READY: ${query.toUpperCase()}`;
                     };
-                } else {
-                    throw new Error("No assets");
-                }
+                } else { throw new Error(); }
             } catch (err) {
-                console.error(err);
                 loadingView.classList.add('hidden');
                 placeholderView.classList.remove('hidden');
                 galleryTitle.innerText = "NODE_DATABASE_ERROR";
-                alert("Gagal menarik data dari secure node. Silakan coba karakter lain!");
             }
         }
 
-        searchBtn.addEventListener('click', () => {
-            const val = searchInput.value.trim();
-            if(val) loadWaifu(val);
-        });
+        searchBtn.addEventListener('click', () => { const val = searchInput.value.trim(); if(val) loadWaifu(val); });
+        searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') { const val = searchInput.value.trim(); if(val) loadWaifu(val); } });
+        randomBtn.addEventListener('click', () => { const rc = randomWaifus[Math.floor(Math.random() * randomWaifus.length)]; searchInput.value = rc; loadWaifu(rc); });
+        downloadBtn.addEventListener('click', () => { if(resultImage.src) window.open(resultImage.src, '_blank'); });
 
-        searchInput.addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') {
-                const val = searchInput.value.trim();
-                if(val) loadWaifu(val);
+
+        // ================= AI CHAT INTERACTION LOGIC =================
+        
+        // Memuat Chat Lama dari Memori jika ada
+        if(chatMemory.length > 0) {
+            chatMemory.forEach(msg => {
+                appendMessageToUI(msg.role === 'user' ? 'user' : 'ai', msg.content, msg.time || getUserTime());
+            });
+        }
+
+        // Buka-Tutup Popup
+        toggleChatBtn.addEventListener('click', toggleChatBox);
+        closeChatBtn.addEventListener('click', toggleChatBox);
+
+        function toggleChatBox() {
+            if(chatWindow.classList.contains('hidden')) {
+                chatWindow.classList.remove('hidden');
+                toggleIcon.className = "fa-solid fa-chevron-down text-lg";
+                chatArea.scrollTop = chatArea.scrollHeight;
+            } else {
+                chatWindow.classList.add('hidden');
+                toggleIcon.className = "fa-solid fa-comments text-lg";
+            }
+        }
+
+        // New Chat (Reset Memory)
+        newChatBtn.addEventListener('click', () => {
+            if(confirm("Hapus seluruh ingatan memori chat dengan Mizu AI?")) {
+                chatMemory = [];
+                localStorage.removeItem('mizu_ai_memory');
+                chatArea.innerHTML = `
+                    <div class="flex flex-col items-start max-w-[85%]">
+                        <div class="bg-gray-900 text-gray-300 rounded-2xl rounded-tl-none p-3 border border-gray-800/40">
+                            Memori direset. Halo lagi! Ada waifu baru yang mau kita bahas? 🌸
+                        </div>
+                        <span class="text-[9px] text-gray-600 font-mono mt-1">${getUserTime()}</span>
+                    </div>
+                `;
             }
         });
 
-        randomBtn.addEventListener('click', () => {
-            const randChar = randomWaifus[Math.floor(Math.random() * randomWaifus.length)];
-            searchInput.value = randChar;
-            loadWaifu(randChar);
-        });
+        // Kirim Chat
+        async function sendChatMessage() {
+            const text = chatInput.value.trim();
+            if(!text) return;
 
-        downloadBtn.addEventListener('click', () => {
-            if(resultImage.src) {
-                window.open(resultImage.src, '_blank');
+            const timeStamp = getUserTime();
+            chatInput.value = '';
+
+            // 1. Tambahkan Pesan User ke UI & Memory
+            appendMessageToUI('user', text, timeStamp);
+            chatMemory.push({ role: 'user', content: text, time: timeStamp });
+            localStorage.setItem('mizu_ai_memory', JSON.stringify(chatMemory));
+
+            // 2. Efek Typing / Loading AI
+            const typingId = appendTypingIndicator();
+
+            try {
+                // Hanya kirim role & content saja tanpa properti 'time' tambahan ke external API
+                const sanitizedMessages = chatMemory.map(({role, content}) => ({role, content}));
+
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'chat', messages: sanitizedMessages })
+                });
+
+                const data = await response.json();
+                document.getElementById(typingId).remove();
+
+                if(data.status && data.data) {
+                    const aiReply = data.data;
+                    const aiTime = getUserTime();
+                    
+                    // 3. Tambahkan Balasan AI ke UI & Memory
+                    appendMessageToUI('ai', aiReply, aiTime);
+                    chatMemory.push({ role: 'assistant', content: aiReply, time: aiTime });
+                    localStorage.setItem('mizu_ai_memory', JSON.stringify(chatMemory));
+                } else { throw new Error(); }
+
+            } catch (error) {
+                if(document.getElementById(typingId)) document.getElementById(typingId).remove();
+                appendMessageToUI('ai', "Maaf, koneksi otak syarafku terputus. Coba kirim pesan lagi ya...", getUserTime());
             }
-        });
-    </script>
-</body>
-</html>
+        }
+
+        sendChatBtn.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChatMessage(); });
+
+        // Helper Render Bubble Chat
+        function appendMessageToUI(sender, text, time) {
+            const wrapper = document.createElement('div');
+            wrapper.className = sender === 'user' ? "flex flex-col items-end w-full ml-auto max-w-[85%]" : "flex flex-col items-start max-w-[85%]";
+            
+            const styleClass = sender === 'user' 
+                ? "bg-crimson text-white rounded-2xl rounded-tr-none p-3 shadow-md" 
+                : "bg-gray-900 text-gray-200 rounded-2xl rounded-tl-none p-3 border border-gray-800/50";
+
+            wrapper.innerHTML = `
+                <div class="${styleClass} break-words whitespace-pre-line">${text}</div>
+                <span class="text-[9px] text-gray-600 font-mono mt-1">${time}</span>
+            `;
+            chatArea.appendChild(wrapper);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // Helper Typing Indicator
+        function appendTypingIndicator() {
+            const id = 'typing-' + Date.now();
+            const wrapper = document.createElement('div');
+            wrapper.id = id;
+            wrapper.className = "flex flex-col items-start max-w-[85%]";
+            wrapper.innerHTML = `
+                <div class="bg-gray-900 text-gray-500 rounded-2xl rounded-tl-none px-4 py-2.5 border border-gray-800 flex gap-1 items-center">
+                    <span class="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce"></span>
+                    <span class="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                    <span class="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+      
