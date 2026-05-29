@@ -69,8 +69,9 @@ export default async function handler(req, res) {
                 },
                 body: JSON.stringify({
                     messages: [systemPrompt, ...cleanedMessages],
-                    model: "llama3-70b-8192", 
-                    temperature: 0.7
+                    model: "llama-3.3-70b-versatile", 
+                    temperature: 0.7,
+                    max_tokens: 500
                 })
             });
 
