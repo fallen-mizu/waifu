@@ -88,7 +88,7 @@
                 <div class="flex justify-between items-center border-b border-gray-900 pb-4 mb-4">
                     <h3 id="gallery-title" class="text-xs font-mono tracking-wider text-gray-500 uppercase">Console Idle</h3>
                     <button id="download-btn" disabled class="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 disabled:opacity-30 disabled:hover:bg-gray-900 text-gray-300 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5">
-                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Original
+                        <i class="fa-solid fa-download text-[10px]"></i> Download Image
                     </button>
                 </div>
 
@@ -132,7 +132,7 @@
             <div id="chat-area" class="chat-area flex-grow p-4 overflow-y-auto space-y-4 text-xs">
                 <div class="flex flex-col items-start max-w-[85%]">
                     <div class="bg-gray-900 text-gray-300 rounded-2xl rounded-tl-none p-3 border border-gray-800/40">
-                        Halo! Aku Mizu AI. Tanyakan apa saja tentang waifu populer, anime, atau manga kesunakanmu! 🌸
+                        Halo! Aku Mizu AI buatan Fallen. Ada waifu populer yang mau kamu tanyakan secara singkat? 🌸
                     </div>
                     <span class="text-[9px] text-gray-600 font-mono mt-1 system-time">00:00</span>
                 </div>
@@ -158,7 +158,7 @@
     <script>
         const randomWaifus = ["Arisu Sakayanagi", "Kamisato Ayaka", "Hu Tao", "Raiden Shogun", "Makima", "Kafka Honkai", "Yae Miko", "Kafuu Chino", "Ganyu Genshin", "Rem Re Zero", "Asuka Langley", "Zero Two", "Kurumi Tokisaki", "Chizuru Mizuhara", "Yor Forger"];
 
-        // Image Search Selectors
+        // Selectors
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
         const randomBtn = document.getElementById('random-btn');
@@ -168,7 +168,6 @@
         const resultImage = document.getElementById('result-image');
         const galleryTitle = document.getElementById('gallery-title');
 
-        // AI Chat Selectors
         const chatWindow = document.getElementById('chat-window');
         const toggleChatBtn = document.getElementById('toggle-chat-btn');
         const toggleIcon = document.getElementById('toggle-icon');
@@ -178,18 +177,17 @@
         const chatInput = document.getElementById('chat-input');
         const sendChatBtn = document.getElementById('send-chat-btn');
 
-        // Memory Array (LocalStorage)
         let chatMemory = JSON.parse(localStorage.getItem('mizu_ai_memory')) || [];
+        let isTyping = false; // Flag status animasi ketik
 
         function getUserTime() {
             const now = new Date();
             return now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         }
 
-        // Inisialisasi Jam Awal Pengguna
         document.querySelector('.system-time').innerText = getUserTime();
 
-        // ================= IMAGE CORE LOGIC =================
+        // ================= IMAGE SEARCH & DOWNLOAD LOGIC =================
         async function loadWaifu(query) {
             placeholderView.classList.add('hidden');
             resultImage.classList.add('hidden');
@@ -225,19 +223,41 @@
         searchBtn.addEventListener('click', () => { const val = searchInput.value.trim(); if(val) loadWaifu(val); });
         searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') { const val = searchInput.value.trim(); if(val) loadWaifu(val); } });
         randomBtn.addEventListener('click', () => { const rc = randomWaifus[Math.floor(Math.random() * randomWaifus.length)]; searchInput.value = rc; loadWaifu(rc); });
-        downloadBtn.addEventListener('click', () => { if(resultImage.src) window.open(resultImage.src, '_blank'); });
-
-
-        // ================= AI CHAT INTERACTION LOGIC =================
         
-        // Memuat Chat Lama dari Memori jika ada
+        // Fitur Force Download Menggunakan Blob Object Bypassing Browser View
+        downloadBtn.addEventListener('click', async () => {
+            if(!resultImage.src) return;
+            const originalText = downloadBtn.innerHTML;
+            try {
+                downloadBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Downloading...`;
+                const imgResponse = await fetch(resultImage.src);
+                const imageBlob = await imgResponse.blob();
+                const blobUrl = window.URL.createObjectURL(imageBlob);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = blobUrl;
+                downloadLink.download = `waifu_${Date.now()}.jpg`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                window.URL.revokeObjectURL(blobUrl);
+            } catch (err) {
+                // Fallback jika CORS Gambar ketat, langsung buka tab baru
+                window.open(resultImage.src, '_blank');
+            } finally {
+                downloadBtn.innerHTML = originalText;
+            }
+        });
+
+
+        // ================= AI CHAT (STREAM TYPING EFFECT) LOGIC =================
+        
         if(chatMemory.length > 0) {
             chatMemory.forEach(msg => {
                 appendMessageToUI(msg.role === 'user' ? 'user' : 'ai', msg.content, msg.time || getUserTime());
             });
         }
 
-        // Buka-Tutup Popup
         toggleChatBtn.addEventListener('click', toggleChatBox);
         closeChatBtn.addEventListener('click', toggleChatBox);
 
@@ -252,15 +272,15 @@
             }
         }
 
-        // New Chat (Reset Memory)
         newChatBtn.addEventListener('click', () => {
+            if(isTyping) return; // Kunci reset jika AI sedang mengetik
             if(confirm("Hapus seluruh ingatan memori chat dengan Mizu AI?")) {
                 chatMemory = [];
                 localStorage.removeItem('mizu_ai_memory');
                 chatArea.innerHTML = `
                     <div class="flex flex-col items-start max-w-[85%]">
                         <div class="bg-gray-900 text-gray-300 rounded-2xl rounded-tl-none p-3 border border-gray-800/40">
-                            Memori direset. Halo lagi! Ada waifu baru yang mau kita bahas? 🌸
+                            Memori direset. Halo lagi! Ada waifu baru yang mau kita bahas secara singkat? 🌸
                         </div>
                         <span class="text-[9px] text-gray-600 font-mono mt-1">${getUserTime()}</span>
                     </div>
@@ -268,30 +288,35 @@
             }
         });
 
-        // Kirim Chat
         async function sendChatMessage() {
             const text = chatInput.value.trim();
-            if(!text) return;
+            if(!text || isTyping) return; // Cegah spam kirim saat AI sedang ngetik
 
             const timeStamp = getUserTime();
             chatInput.value = '';
 
-            // 1. Tambahkan Pesan User ke UI & Memory
             appendMessageToUI('user', text, timeStamp);
             chatMemory.push({ role: 'user', content: text, time: timeStamp });
             localStorage.setItem('mizu_ai_memory', JSON.stringify(chatMemory));
 
-            // 2. Efek Typing / Loading AI
             const typingId = appendTypingIndicator();
 
             try {
-                // Bersihkan properti lokal 'time' sebelum dikirim ke API external
-                const sanitizedMessages = chatMemory.map(({role, content}) => ({role, content}));
+                // Injeksi Aturan Khusus langsung di paket data riwayat agar Groq mematuhinya secara absolut
+                const customSystemInstruction = {
+                    role: "system",
+                    content: "PENTING: Jawablah dengan sangat singkat, ringkas, dan langsung ke poin utama (maksimal 2 kalimat pendek). Gaya santai. Jika ditanya mengenai siapa penciptamu, pembuatmu, atau developermu, jawablah dengan tegas bahwa kamu diciptakan oleh Fallen."
+                };
 
+                const sanitizedMessages = chatMemory.map(({role, content}) => ({role, content}));
+                
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'chat', messages: sanitizedMessages })
+                    body: JSON.stringify({ 
+                        type: 'chat', 
+                        messages: [customSystemInstruction, ...sanitizedMessages] 
+                    })
                 });
 
                 const data = await response.json();
@@ -303,8 +328,9 @@
                     const aiReply = data.data;
                     const aiTime = getUserTime();
                     
-                    // 3. Tambahkan Balasan AI ke UI & Memory
-                    appendMessageToUI('ai', aiReply, aiTime);
+                    // Trigger Efek Ketik ala ChatGPT
+                    await appendMessageWithTypingEffect(aiReply, aiTime);
+                    
                     chatMemory.push({ role: 'assistant', content: aiReply, time: aiTime });
                     localStorage.setItem('mizu_ai_memory', JSON.stringify(chatMemory));
                 } else { throw new Error(); }
@@ -319,7 +345,7 @@
         sendChatBtn.addEventListener('click', sendChatMessage);
         chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChatMessage(); });
 
-        // Helper Render Bubble Chat
+         // Fungsi Render Bubble Chat Biasa (Untuk riwayat lama / pesan user)
         function appendMessageToUI(sender, text, time) {
             const wrapper = document.createElement('div');
             wrapper.className = sender === 'user' ? "flex flex-col items-end w-full ml-auto max-w-[85%]" : "flex flex-col items-start max-w-[85%]";
@@ -336,7 +362,37 @@
             chatArea.scrollTop = chatArea.scrollHeight;
         }
 
-        // Helper Typing Indicator
+        // Fungsi Simulasi Efek Mengetik Mengalir (ChatGPT Style)
+        function appendMessageWithTypingEffect(fullText, time) {
+            return new Promise((resolve) => {
+                isTyping = true;
+                const wrapper = document.createElement('div');
+                wrapper.className = "flex flex-col items-start max-w-[85%]";
+                
+                wrapper.innerHTML = `
+                    <div class="chat-bubble-ai bg-gray-900 text-gray-200 rounded-2xl rounded-tl-none p-3 border border-gray-800/50 break-words whitespace-pre-line"></div>
+                    <span class="text-[9px] text-gray-600 font-mono mt-1">${time}</span>
+                `;
+                chatArea.appendChild(wrapper);
+                
+                const bubbleElement = wrapper.querySelector('.chat-bubble-ai');
+                let currentIdx = 0;
+                
+                // Interval kecepatan pengetikan teks per huruf (25ms)
+                const typingInterval = setInterval(() => {
+                    if (currentIdx < fullText.length) {
+                        bubbleElement.textContent += fullText.charAt(currentIdx);
+                        currentIdx++;
+                        chatArea.scrollTop = chatArea.scrollHeight; // Auto scroll mengikuti text baru
+                    } else {
+                        clearInterval(typingInterval);
+                        isTyping = false;
+                        resolve();
+                    }
+                }, 25);
+            });
+                }
+
         function appendTypingIndicator() {
             const id = 'typing-' + Date.now();
             const wrapper = document.createElement('div');
@@ -347,7 +403,7 @@
                     <span class="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce"></span>
                     <span class="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
                     <span class="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-                        </div>
+                </div>
             `;
             chatArea.appendChild(wrapper);
             chatArea.scrollTop = chatArea.scrollHeight;
@@ -356,3 +412,4 @@
     </script>
 </body>
 </html>
+        
