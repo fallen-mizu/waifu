@@ -40,6 +40,7 @@ const systemTimeEl = document.querySelector('.system-time');
 if (systemTimeEl) systemTimeEl.innerText = getUserTime();
 
 // ================= INTERNAL CUSTOM MODAL ENGINE =================
+// ================= INTERNAL CUSTOM MODAL ENGINE =================
 function showCustomModal({ title, text, icon, showCancel = true, onConfirm }) {
     modalTitle.innerText = title || "System Action";
     modalText.innerText = text || "";
@@ -51,21 +52,28 @@ function showCustomModal({ title, text, icon, showCancel = true, onConfirm }) {
         modalCancelBtn.classList.add('hidden');
     }
 
-    customModal.classList.remove('hidden');
+    // Ambil ulang tombol langsung dari DOM agar tidak merujuk ke elemen 'hantu' hasil kloning sebelumnya
+    const currentConfirmBtn = document.getElementById('modal-confirm-btn');
 
-    // Reset Event Listeners dengan kloning elemen agar tidak terjadi stacking trigger
-    const newConfirm = modalConfirmBtn.cloneNode(true);
-    modalConfirmBtn.parentNode.replaceChild(newConfirm, modalConfirmBtn);
+    // Kloning tombol konfirmasi aktif untuk membersihkan sisa listener lama secara total
+    const cleanConfirmBtn = currentConfirmBtn.cloneNode(true);
+    currentConfirmBtn.parentNode.replaceChild(cleanConfirmBtn, currentConfirmBtn);
     
-    newConfirm.addEventListener('click', () => {
+    // Pasang event listener baru secara eksklusif
+    cleanConfirmBtn.addEventListener('click', () => {
         customModal.classList.add('hidden');
         if (onConfirm) onConfirm();
     });
 
+    // Tombol batal cukup menutup modal
     modalCancelBtn.onclick = () => {
         customModal.classList.add('hidden');
     };
+
+    // Tampilkan modal ke layar
+    customModal.classList.remove('hidden');
 }
+
 
 // ================= IMAGE SEARCH & REDIRECT LOGIC =================
 async function loadWaifu(query) {
