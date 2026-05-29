@@ -110,7 +110,7 @@
     </main>
 
     <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        <div id="chat-window" class="hidden w-[360px] h-[480px] max-w-[calc(100vw-2rem)] rounded-2xl glass-card flex flex-col shadow-2xl overflow-hidden mb-4 border border-gray-800 transition-all duration-300">
+        <div id="chat-window" class="hidden w-[360px] h-[480px] max-w-[calc(100vw-2rem)] rounded-2xl glass-card flex flex-col shadow-2xl overflow-hidden mb-4 border border-gray-800/50 transition-all duration-300">
             <div class="p-4 border-b border-gray-900 bg-gray-950/80 flex justify-between items-center">
                 <div class="flex items-center gap-2.5">
                     <div class="w-2.5 h-2.5 rounded-full bg-crimson animate-pulse"></div>
@@ -132,7 +132,7 @@
             <div id="chat-area" class="chat-area flex-grow p-4 overflow-y-auto space-y-4 text-xs">
                 <div class="flex flex-col items-start max-w-[85%]">
                     <div class="bg-gray-900 text-gray-300 rounded-2xl rounded-tl-none p-3 border border-gray-800/40">
-                        Halo! Aku Mizu AI. Tanyakan apa saja tentang waifu populer, anime, atau manga kesukaanmu! 🌸
+                        Halo! Aku Mizu AI. Tanyakan apa saja tentang waifu populer, anime, atau manga kesunakanmu! 🌸
                     </div>
                     <span class="text-[9px] text-gray-600 font-mono mt-1 system-time">00:00</span>
                 </div>
@@ -152,7 +152,7 @@
     </div>
 
     <footer class="w-full text-center py-5 border-t border-gray-950 text-[11px] font-mono text-gray-600 bg-gray-950/60">
-        <p>&copy; 2026 Waifu Vault Project. Powered by Private API Net.</p>
+        <p>&copy; 2026 Waifu Vault Project. Powered by Groq AI.</p>
     </footer>
 
     <script>
@@ -178,16 +178,16 @@
         const chatInput = document.getElementById('chat-input');
         const sendChatBtn = document.getElementById('send-chat-btn');
 
-        // Memory Array (Dikelola via LocalStorage)
+        // Memory Array (LocalStorage)
         let chatMemory = JSON.parse(localStorage.getItem('mizu_ai_memory')) || [];
-
-        // Inisialisasi Jam Awal Pengguna
-        document.querySelector('.system-time').innerText = getUserTime();
 
         function getUserTime() {
             const now = new Date();
             return now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         }
+
+        // Inisialisasi Jam Awal Pengguna
+        document.querySelector('.system-time').innerText = getUserTime();
 
         // ================= IMAGE CORE LOGIC =================
         async function loadWaifu(query) {
@@ -210,7 +210,7 @@
                     resultImage.src = randomImgUrl;
                     resultImage.onload = () => {
                         loadingView.classList.add('hidden');
-                        resultImage.removeCls = resultImage.classList.remove('hidden');
+                        resultImage.classList.remove('hidden');
                         downloadBtn.disabled = false;
                         galleryTitle.innerText = `READY: ${query.toUpperCase()}`;
                     };
@@ -285,7 +285,7 @@
             const typingId = appendTypingIndicator();
 
             try {
-                // Hanya kirim role & content saja tanpa properti 'time' tambahan ke external API
+                // Bersihkan properti lokal 'time' sebelum dikirim ke API external
                 const sanitizedMessages = chatMemory.map(({role, content}) => ({role, content}));
 
                 const response = await fetch('/api/chat', {
@@ -295,7 +295,9 @@
                 });
 
                 const data = await response.json();
-                document.getElementById(typingId).remove();
+                
+                const indicator = document.getElementById(typingId);
+                if (indicator) indicator.remove();
 
                 if(data.status && data.data) {
                     const aiReply = data.data;
@@ -308,7 +310,8 @@
                 } else { throw new Error(); }
 
             } catch (error) {
-                if(document.getElementById(typingId)) document.getElementById(typingId).remove();
+                const indicator = document.getElementById(typingId);
+                if (indicator) indicator.remove();
                 appendMessageToUI('ai', "Maaf, koneksi otak syarafku terputus. Coba kirim pesan lagi ya...", getUserTime());
             }
         }
@@ -343,5 +346,4 @@
                 <div class="bg-gray-900 text-gray-500 rounded-2xl rounded-tl-none px-4 py-2.5 border border-gray-800 flex gap-1 items-center">
                     <span class="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce"></span>
                     <span class="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                    <span class="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-      
+                    <span class="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bo
