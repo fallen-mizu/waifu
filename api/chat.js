@@ -1,8 +1,7 @@
-// Menggunakan modul bawaan Node.js untuk menangani fetch data secara aman
-const fetch = require('node-fetch').default || global.fetch;
+import fetch from 'node-fetch';
 
-module.exports = async function handler(req, res) {
-    // Mengatur Header CORS secara komprehensif
+export default async function handler(req, res) {
+    // Mengatur Header CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -11,7 +10,6 @@ module.exports = async function handler(req, res) {
         return res.status(200).end();
     }
 
-    // Pendekatan parsing body yang aman baik dari form maupun json raw
     let bodyData = {};
     if (req.method === 'POST') {
         try {
@@ -71,7 +69,7 @@ module.exports = async function handler(req, res) {
                 },
                 body: JSON.stringify({
                     messages: [systemPrompt, ...cleanedMessages],
-                    model: "llama-3.3-70b-versatile", 
+                    model: "llama3-70b-8192", 
                     temperature: 0.7
                 })
             });
@@ -82,7 +80,7 @@ module.exports = async function handler(req, res) {
                 const aiReply = data.choices[0].message.content;
                 return res.status(200).json({ status: true, data: aiReply });
             } else {
-                return res.status(500).json({ status: false, message: "Groq API returned an empty response architecture", error: data });
+                return res.status(500).json({ status: false, message: "Groq API Error", details: data });
             }
         } catch (error) {
             return res.status(500).json({ status: false, message: "Failed to connect to Groq Cloud Network" });
@@ -90,5 +88,4 @@ module.exports = async function handler(req, res) {
     }
 
     return res.status(400).json({ status: false, message: "Invalid Request Type" });
-};
-        
+            }
